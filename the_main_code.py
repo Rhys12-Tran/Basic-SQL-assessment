@@ -256,6 +256,28 @@ def search_by_priority(connection):
     print("-" * 75 + "\n")
 
 
+def delete_all_tasks(connection):
+    """
+    Deletes every single task in the database at once.
+    Asks the user to type DELETE (all capitals) to confirm.
+    This stops someone wiping everything by accident.
+    """
+    print("\n--- Delete All Tasks ---")
+    view_all_tasks(connection)
+
+    # Double confirmation — the user must type the word DELETE exactly.
+    # A simple yes/no is too easy to hit by accident for something this permanent.
+    confirm = input("  Type DELETE to wipe all tasks, or anything else to cancel: ").strip()
+
+    if confirm == "DELETE":
+        cursor = connection.cursor()
+        cursor.execute(f"DELETE FROM {TABLE_NAME}")
+        connection.commit()
+        print("  >> All tasks have been deleted.\n")
+    else:
+        print("  >> Delete all cancelled.\n")
+
+
 # ─────────────────────────────────────────
 # MAIN MENU LOOP (the menu that runs everything)
 # ─────────────────────────────────────────
@@ -272,7 +294,8 @@ def show_menu():
     print("  3. Update task status")
     print("  4. Delete a task")
     print("  5. Search tasks by priority")
-    print("  6. Exit")
+    print("  6. Delete ALL tasks")
+    print("  7. Exit")
     print("=" * 40)
 
 
@@ -288,7 +311,7 @@ def main():
 
     while True:
         show_menu()
-        choice = input("  Enter your choice (1-6): ").strip()
+        choice = input("  Enter your choice (1-7): ").strip()
 
         if choice == "1":
             view_all_tasks(connection)
@@ -301,11 +324,13 @@ def main():
         elif choice == "5":
             search_by_priority(connection)
         elif choice == "6":
+            delete_all_tasks(connection)
+        elif choice == "7":
             print("\n  Goodbye! Your tasks have been saved.\n")
             connection.close()
             break
         else:
-            print("\n  >> Invalid choice. Please enter a number from 1 to 6.\n")
+            print("\n  >> Invalid choice. Please enter a number from 1 to 7.\n")
 
 
 if __name__ == "__main__":
