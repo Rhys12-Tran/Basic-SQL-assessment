@@ -18,7 +18,7 @@ VALID_STATUSES   = ["Not Started", "In Progress", "Complete"]  # only these thre
 # DATABASE SETUP (connects and creates the table)
 # ─────────────────────────────────────────
 
-def connect_to_database():
+def connect_to_database(): #cai nay la se ket noi voi SQL cua may tinh
     """
     Opens a connection to the SQLite database file.
     Returns the connection so other functions can use it.
@@ -27,7 +27,7 @@ def connect_to_database():
     return connection
 
 
-def setup_table(connection):
+def setup_table(connection): #"make the table only if it doesn't already exist
     """
     Creates the Task table if it does not already exist.
     Runs every time the program starts — safe to run again and again.
@@ -49,7 +49,7 @@ def setup_table(connection):
 # INPUT HELPER FUNCTIONS  (checks what the user types)
 # ─────────────────────────────────────────
 
-def get_valid_task_name(prompt):
+def get_valid_task_name(prompt): # ask the user input valid or nor
     """
     Asks for a task name and checks two things:
     1. It is not empty (blank input)
@@ -66,7 +66,7 @@ def get_valid_task_name(prompt):
             return name
 
 
-def get_choice_from_list(prompt, valid_choices):
+def get_choice_from_list(prompt, valid_choices): # Neu nguoi dung nhap Xin chao hay la xin chao thi van hoat dong
     """
     Shows the valid options and keeps asking until the user picks one.
     The check is case-insensitive (e.g. 'high' works as well as 'High').
@@ -81,7 +81,7 @@ def get_choice_from_list(prompt, valid_choices):
         print(f"  >> Invalid choice. Please pick from: {options_string}")
 
 
-def get_valid_date(prompt):
+def get_valid_date(prompt):  #checks the day is exactly YYYY-MM-DD
     """
     Asks for a date in YYYY-MM-DD format.
     Checks that the string is exactly 10 characters and has dashes in the right spots.
@@ -187,6 +187,7 @@ def delete_task(connection):
     """
     Shows all tasks, asks for an ID, confirms the delete with the user,
     then removes that task from the database.
+    After deleting, renumbers all remaining IDs so there are no gaps.
     Handles letters entered instead of a number, and non-existent IDs.
     """
     print("\n--- Delete Task ---")
@@ -211,6 +212,15 @@ def delete_task(connection):
 
     if confirm == "yes":
         cursor.execute(f"DELETE FROM {TABLE_NAME} WHERE task_id = ?", (task_id,))
+
+        # After deleting, shift every ID above the deleted one down by 1.
+        # Example: tasks 1, 2, 3 — delete 2 — remaining become 1, 2.
+        # WHERE task_id > ? means only tasks AFTER the deleted one get renumbered.
+        cursor.execute(
+            f"UPDATE {TABLE_NAME} SET task_id = task_id - 1 WHERE task_id > ?",
+            (task_id,)
+        )
+
         connection.commit()
         print(f"  >> Task '{task_name}' has been deleted.\n")
     else:
