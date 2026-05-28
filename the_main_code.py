@@ -36,14 +36,15 @@ def setup_table(connection): #"make the table only if it doesn't already exist
     cursor.execute(f"""
         CREATE TABLE IF NOT EXISTS {TABLE_NAME} (
             task_id  INTEGER PRIMARY KEY AUTOINCREMENT,
-            name     TEXT(40)  NOT NULL,
+            name     TEXT(40)  NOT NULL,    
             priority TEXT(40)  NOT NULL,
             status   TEXT      NOT NULL,
             due_date TEXT      NOT NULL
         )
     """)
+    #After every INSERT, UPDATE, DELETE
     connection.commit()
-
+    
 
 # ─────────────────────────────────────────
 # INPUT HELPER FUNCTIONS  (checks what the user types)
@@ -92,7 +93,7 @@ def get_valid_date(prompt):  #checks the day is exactly YYYY-MM-DD
         if (len(date_input) == 10
                 and date_input[4] == "-"
                 and date_input[7] == "-"
-                and date_input[:4].isdigit()
+                and date_input[:4].isdigit() # get_valid_date
                 and date_input[5:7].isdigit()
                 and date_input[8:].isdigit()):
             return date_input
@@ -101,7 +102,7 @@ def get_valid_date(prompt):  #checks the day is exactly YYYY-MM-DD
 
 
 # ─────────────────────────────────────────
-# CORE FEATURE FUNCTIONS
+# CORE FEATURE FUNCTIONS (they will show the table to ask the user)
 # ─────────────────────────────────────────
 
 def view_all_tasks(connection):
@@ -149,8 +150,8 @@ def add_task(connection):
 
     print(f"\n  >> Task '{name}' has been added successfully!\n")
 
-
-def update_task_status(connection):
+# update_task_status
+def update_task_status(connection): 
     """
     Shows all tasks, asks for an ID, checks it exists,
     then lets the user pick a new status for that task.
@@ -182,7 +183,7 @@ def update_task_status(connection):
     connection.commit()
     print(f"  >> Task {task_id} status updated to '{new_status}'.\n")
 
-
+# delete_task
 def delete_task(connection):
     """
     Shows all tasks, asks for an ID, confirms the delete with the user,
@@ -220,7 +221,7 @@ def delete_task(connection):
             f"UPDATE {TABLE_NAME} SET task_id = task_id - 1 WHERE task_id > ?",
             (task_id,)
         )
-
+        #After every INSERT, UPDATE, DELETE
         connection.commit()
         print(f"  >> Task '{task_name}' has been deleted.\n")
     else:
@@ -238,7 +239,8 @@ def search_by_priority(connection):
 
     cursor = connection.cursor()
     cursor.execute(f"SELECT * FROM {TABLE_NAME} WHERE priority = ?", (priority,))
-    tasks = cursor.fetchall()
+    #view_all_tasks, search_by_priority
+    tasks = cursor.fetchall()  
 
     if len(tasks) == 0:
         print(f"\n  No tasks found with priority '{priority}'.\n")
@@ -272,7 +274,7 @@ def delete_all_tasks(connection):
     if confirm == "DELETE":
         cursor = connection.cursor()
         cursor.execute(f"DELETE FROM {TABLE_NAME}")
-        connection.commit()
+        connection.commit() #After every INSERT, UPDATE, DELETE
         print("  >> All tasks have been deleted.\n")
     else:
         print("  >> Delete all cancelled.\n")
